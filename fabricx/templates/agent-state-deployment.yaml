@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fabricx.fullname" . }}-agent-state
+  labels:
+    {{- include "fabricx.labels" (dict "root" . "name" "agent-state") | nindent 4 }}
+spec:
+  replicas: {{ .Values.agentState.replicas }}
+  selector:
+    matchLabels:
+      {{- include "fabricx.labels" (dict "root" . "name" "agent-state") | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.agentState.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.agentState.rollingUpdate.maxSurge }}
+  template:
+    metadata:
+      labels:
+        {{- include "fabricx.labels" (dict "root" . "name" "agent-state") | nindent 8 }}
+    spec:
+      containers:
+        - name: agent-state
+          image: "{{ .Values.agentState.image.repository }}:{{ .Values.agentState.image.tag }}"
+          imagePullPolicy: {{ .Values.agentState.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.agentState.service.port }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.agentState.probes.readinessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.agentState.probes.readinessInitialDelaySeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.agentState.probes.livenessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.agentState.probes.livenessInitialDelaySeconds }}
+          resources:
+            {{- toYaml .Values.agentState.resources | nindent 12 }}
+          args:
+          {{- with .Values.agentState.extraArgs }}{{ toYaml . | nindent 12 }}{{- end }}

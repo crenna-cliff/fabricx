@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fabricx.fullname" . }}-interaction
+  labels:
+    {{- include "fabricx.labels" (dict "root" . "name" "interaction-service") | nindent 4 }}
+spec:
+  replicas: {{ .Values.interactionService.replicas }}
+  selector:
+    matchLabels:
+      {{- include "fabricx.labels" (dict "root" . "name" "interaction-service") | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.interactionService.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.interactionService.rollingUpdate.maxSurge }}
+  template:
+    metadata:
+      labels:
+        {{- include "fabricx.labels" (dict "root" . "name" "interaction-service") | nindent 8 }}
+    spec:
+      containers:
+        - name: interaction
+          image: "{{ .Values.interactionService.image.repository }}:{{ .Values.interactionService.image.tag }}"
+          imagePullPolicy: {{ .Values.interactionService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.interactionService.service.port }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.interactionService.probes.readinessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.interactionService.probes.readinessInitialDelaySeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.interactionService.probes.livenessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.interactionService.probes.livenessInitialDelaySeconds }}
+          resources:
+            {{- toYaml .Values.interactionService.resources | nindent 12 }}
+          args:
+          {{- with .Values.interactionService.extraArgs }}{{ toYaml . | nindent 12 }}{{- end }}

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fabricx.fullname" . }}-interaction
+  labels:
+    {{- include "fabricx.labels" (dict "root" . "name" "interaction-service") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "fabricx.labels" (dict "root" . "name" "interaction-service") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.interactionService.service.port }}
+      targetPort: http

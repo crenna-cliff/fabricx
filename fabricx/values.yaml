@@ -1,0 +1,72 @@
+global:
+  labels:
+    app.kubernetes.io/part-of: fabricx
+
+authService:
+  replicas: 3
+  image:
+    repository: hashicorp/http-echo
+    tag: "0.2.3"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+  probes:
+    readinessPath: /
+    livenessPath: /
+    readinessInitialDelaySeconds: 5
+    livenessInitialDelaySeconds: 10
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "256Mi" }
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+  extraArgs:
+    - "-text=Interaction OK"
+    - "-listen=:8080"
+
+agentState:
+  replicas: 2
+  image:
+    repository: hashicorp/http-echo
+    tag: "0.2.3"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8081
+  probes:
+    readinessPath: /
+    livenessPath: /
+    readinessInitialDelaySeconds: 5
+    livenessInitialDelaySeconds: 10
+  resources:
+    requests: { cpu: "50m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "256Mi" }
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+  extraArgs:
+    - "-text=Interaction OK"
+    - "-listen=:8081"
+
+interactionService:
+  replicas: 2
+  image:
+    repository: hashicorp/http-echo
+    tag: "0.2.3"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8082
+  probes:
+    readinessPath: /
+    livenessPath: /
+    readinessInitialDelaySeconds: 5
+    livenessInitialDelaySeconds: 10
+  resources:
+    requests: { cpu: "50m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "256Mi" }
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+  extraArgs:
+    - "-text=Interaction OK"
+    - "-listen=:8082"

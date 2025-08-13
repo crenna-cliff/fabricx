@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Helm
+# Ignore any packaged chart archives
+*.tgz
+# Helm release output / templates rendered
+/tmp/
+fabricx/*.rendered.yaml
+
+# Kubernetes
+# Kustomize build output
+kustomization.yaml.tmp
+# kubectl cache
+.kube/cache/
+
+# Logs
+*.log
+
+# Local overrides (optional)
+values.override.yaml

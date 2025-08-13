@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "fabricx.fullname" . }}-auth-to-agent-test"
+  labels:
+    {{- include "fabricx.labels" (dict "root" . "name" "auth-to-agent-test") | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: curl
+      image: curlimages/curl:8.9.0
+      args:
+        - sh
+        - -c
+        - >
+          echo "Testing connectivity auth -> agent-state" &&
+          curl -sSf http://{{ include "fabricx.fullname" . }}-agent-state:{{ .Values.agentState.service.port }}{{ .Values.agentState.probes.readinessPath }} &&
+          echo "OK"

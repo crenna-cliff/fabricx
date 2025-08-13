@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fabricx.fullname" . }}-auth
+  labels:
+    {{- include "fabricx.labels" (dict "root" . "name" "auth-service") | nindent 4 }}
+spec:
+  replicas: {{ .Values.authService.replicas }}
+  selector:
+    matchLabels:
+      {{- include "fabricx.labels" (dict "root" . "name" "auth-service") | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.authService.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.authService.rollingUpdate.maxSurge }}
+  template:
+    metadata:
+      labels:
+        {{- include "fabricx.labels" (dict "root" . "name" "auth-service") | nindent 8 }}
+    spec:
+      containers:
+        - name: auth
+          image: "{{ .Values.authService.image.repository }}:{{ .Values.authService.image.tag }}"
+          imagePullPolicy: {{ .Values.authService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.authService.service.port }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.authService.probes.readinessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.authService.probes.readinessInitialDelaySeconds }}
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.authService.probes.livenessPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.authService.probes.livenessInitialDelaySeconds }}
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.authService.resources | nindent 12 }}
+          args:
+          {{- with .Values.authService.extraArgs }}{{ toYaml . | nindent 12 }}{{- end }}
